@@ -60,7 +60,7 @@ function Compiler() {
         setFontSize={setFontSize}
       />
       <div>
-        <div className="flex-col">
+        <div className="flex-col"> 
           <div>
             <Editor
               options={options}
