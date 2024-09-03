@@ -50,7 +50,7 @@ export default function Workshop() {
     if (data1.check === false) {
       alert("Some error Occurred! ");
     } else {
-      alert("Yupp! Your form is submitted ");
+      alert("Yup! Your form is submitted ");
 
       setData({
         username: "",
