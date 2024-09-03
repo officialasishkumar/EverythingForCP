@@ -22,7 +22,7 @@ Once again, welcome to EverythingForCp! We can't wait to see you at the event an
 
 Best regards,
 
-Here is meet link : ${link}
+Here is the meet link : ${link}
 
 Admin
 EverythingForCp`;
