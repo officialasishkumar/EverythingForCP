@@ -16,9 +16,9 @@ app.use(express.json()); // json m bhjega
 
 // connecttomongo();
 
-app.use("/Workshop", require("./routes/Tevent.js"));
 app.use("/Register", require("./routes/Tuser.js"));
 app.use("/compile", require("./routes/Compiler.js"));
+app.use("/Workshop", require("./routes/Tevent.js"));
 
 app.listen(800, () => {
   console.log("Listen");
