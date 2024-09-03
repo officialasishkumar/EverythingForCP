@@ -57,7 +57,7 @@ export default function Workshop() {
         eventname: "",
         linkedin: "",
         email: "",
-        date: "",
+        date: "", 
         time: "",
         eventimage: "",
         description: "",
