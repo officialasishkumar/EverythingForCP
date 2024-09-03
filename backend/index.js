@@ -30,8 +30,8 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("connection is successfull");
+    console.log("connection success");
   })
   .catch((err) => {
-    console.log("Failed");
+    console.log("failed");
   });
