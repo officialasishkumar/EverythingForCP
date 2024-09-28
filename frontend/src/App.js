@@ -4,7 +4,6 @@ import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 import Compiler from "./Component/Compiler/Compiler";
 import Ladder from "./Component/Ladder/Ladder";
 import Cfvis from "./Component/Visualize/Cfvis";
-import WorkshopPage from "./Component/Workshop/WorkshopPage";
 import Footer from "./Component/Footer";
 import Home from "./Component/Home/Home";
 
@@ -63,15 +62,6 @@ export default function App() {
                 }}
               >
                 COMPILER
-              </button>
-
-              <button
-                className="hover:text-blue-900 hover:bg-white font-extrabold px-5 text-xl"
-                onClick={() => {
-                  setCount(3);
-                }}
-              >
-                WORKSHOP
               </button>
             </ul>
           </div>
@@ -136,17 +126,6 @@ export default function App() {
                   COMPILER
                 </button>
               </li>
-              <li>
-                <button
-                  className="hover:text-blue-900 hover:bg-white p-3"
-                  onClick={() => {
-                    setCount(3);
-                    setVis(false);
-                  }}
-                >
-                  WORKSHOP
-                </button>
-              </li>
             </ul>
           </div>
         </div>
@@ -155,7 +134,6 @@ export default function App() {
       {count === 0 && <Cfvis />}
       {count === 1 && <Ladder />}
       {count === 2 && <Compiler />}
-      {count === 3 && <WorkshopPage />}
       {count === 4 && <Footer />}
     </>
   );
