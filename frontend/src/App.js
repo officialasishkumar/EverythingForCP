@@ -7,7 +7,6 @@ import Cfvis from "./Component/Visualize/Cfvis";
 import WorkshopPage from "./Component/Workshop/WorkshopPage";
 import Footer from "./Component/Footer";
 import Home from "./Component/Home/Home";
-import Team from "./Component/About/Team";
 
 export default function App() {
   const [count, setCount] = useState(4);
@@ -73,15 +72,6 @@ export default function App() {
                 }}
               >
                 WORKSHOP
-              </button>
-
-              <button
-                className="hover:text-blue-900 hover:bg-white font-extrabold px-5 text-xl"
-                onClick={() => {
-                  setCount(5);
-                }}
-              >
-                OUR TEAM
               </button>
             </ul>
           </div>
@@ -157,17 +147,6 @@ export default function App() {
                   WORKSHOP
                 </button>
               </li>
-              <li>
-                <button
-                  className="hover:text-blue-900 hover:bg-white p-3"
-                  onClick={() => {
-                    setCount(5);
-                    setVis(false);
-                  }}
-                >
-                  OUR TEAM
-                </button>
-              </li>
             </ul>
           </div>
         </div>
@@ -177,7 +156,6 @@ export default function App() {
       {count === 1 && <Ladder />}
       {count === 2 && <Compiler />}
       {count === 3 && <WorkshopPage />}
-      {count === 5 && <Team />}
       {count === 4 && <Footer />}
     </>
   );
