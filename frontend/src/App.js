@@ -2,11 +2,15 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { AiOutlineMenu, AiOutlineClose } from "react-icons/ai";
 
+// Import the pages from your existing project
 import Home from "./Component/Home/Home";
 import Cfvis from "./Component/Visualize/Cfvis";
 import Ladder from "./Component/Ladder/Ladder";
 import Compiler from "./Component/Compiler/Compiler";
 import Footer from "./Component/Footer";
+
+// Import the Algoviz project’s main component (renamed from App.jsx)
+import AlgovizApp from "./algoviz/AlgovizApp";
 
 export default function App() {
   const [menuVisible, setMenuVisible] = useState(false);
@@ -25,23 +29,43 @@ export default function App() {
           <div className="hidden md:flex">
             <ul className="flex text-white items-center">
               <li className="px-5">
-                <Link className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2" to="/">
+                <Link
+                  className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2"
+                  to="/"
+                >
                   HOME
                 </Link>
               </li>
               <li className="px-5">
-                <Link className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2" to="/visualize">
+                <Link
+                  className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2"
+                  to="/visualize"
+                >
                   VISUALIZEME
                 </Link>
               </li>
               <li className="px-5">
-                <Link className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2" to="/ladder">
+                <Link
+                  className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2"
+                  to="/ladder"
+                >
                   ELEVATOR
                 </Link>
               </li>
               <li className="px-5">
-                <Link className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2" to="/compiler">
+                <Link
+                  className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2"
+                  to="/compiler"
+                >
                   COMPILER
+                </Link>
+              </li>
+              <li className="px-5">
+                <Link
+                  className="hover:text-blue-900 hover:bg-white font-extrabold text-xl p-2"
+                  to="/algoviz"
+                >
+                  ALGOVIZ
                 </Link>
               </li>
             </ul>
@@ -89,20 +113,28 @@ export default function App() {
           >
             COMPILER
           </Link>
+          <Link
+            to="/algoviz"
+            className="p-3 hover:text-blue-900 hover:bg-white w-full text-center"
+            onClick={() => setMenuVisible(false)}
+          >
+            ALGOVIZ
+          </Link>
         </div>
       )}
 
-      {/* Routes */}
+      {/* Define all the Routes */}
       <div className="min-h-screen">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/visualize" element={<Cfvis />} />
           <Route path="/ladder" element={<Ladder />} />
           <Route path="/compiler" element={<Compiler />} />
+          <Route path="/algoviz/*" element={<AlgovizApp />} />
         </Routes>
       </div>
 
-      <Footer />
+      {/* <Footer /> */}
     </Router>
   );
 }
