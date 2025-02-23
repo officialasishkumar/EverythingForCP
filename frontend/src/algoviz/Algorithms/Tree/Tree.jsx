@@ -3,8 +3,8 @@ import AppendScript, { RemoveScript } from "../../Components/AppendScript";
 import "../../Styles/Tree/Tree.css";
 const Tree = () => {
     useEffect(() => {
-        AppendScript('tree.js');
-        return () => RemoveScript('tree.js')
+        AppendScript('/tree.js');
+        return () => RemoveScript('/tree.js')
     }, []);
     return (
         <>

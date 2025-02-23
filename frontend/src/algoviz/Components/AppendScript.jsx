@@ -1,6 +1,7 @@
-const AppendScript = (scriptToAppend) => {
-
-    // if script exists do not append
+const AppendScript = (scriptToAppend, globalCheckName) => {
+    if (globalCheckName && window[globalCheckName]) {
+        return; // The script’s functionality is already loaded.
+    }
     const scripts = document.getElementsByTagName("script");
     for (let i = 0; i < scripts.length; i++) {
         if (scripts[i].src === scriptToAppend) {
@@ -11,7 +12,7 @@ const AppendScript = (scriptToAppend) => {
     script.type = "text/javascript";
     script.src = scriptToAppend;
     document.head.appendChild(script);
-}
+};
 
 export default AppendScript;
 
