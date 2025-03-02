@@ -1,50 +1,102 @@
+/* Use sticky positioning for the traversal order container */
+#traversal-result {
+  position: sticky;
+  top: 0;
+  margin: 10px 50px;
+  padding: 10px;
+  background-color: #ffffff;
+  /* set background to white */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font: 700 1.5rem "Roboto", sans-serif;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  /* Smooth transition when state changes */
+}
+
+/* Optional: add a label before the traversal order */
+#traversal-result::before {
+  content: "Traversal Order: ";
+  margin-right: 10px;
+  font-size: 1.2rem;
+  color: #000;
+}
+
+/* Animation for new elements (nodes) */
+.node-base {
+  stroke: black;
+  stroke-width: 1px;
+  fill: white;
+  transition: all 0.2s;
+  animation: fadeInNode 0.5s ease-in-out;
+}
+
+@keyframes fadeInNode {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Keep the rest of your styles as they were */
 #tree {
   display: flex;
   min-width: 100vw;
   min-height: 100vh;
   background-color: #dadada;
 }
-#tree .node-base {
-  stroke: black;
-  stroke-width: 1px;
-  fill: white;
-  transition: all 0.2s;
-}
+
 #tree .node-base:hover {
   stroke: #00dd00;
   stroke-width: 4px;
 }
+
 #tree .node-base.selected {
   stroke: #ff0000;
   stroke-width: 4px;
 }
+
 #tree .node-base.explored {
   stroke: #aaaaff;
   stroke-width: 4px;
 }
+
 #tree .node-base.visited {
   stroke: #0000ff;
   stroke-width: 4px;
 }
+
 #tree .node-path {
   stroke: #00dd00;
   stroke-width: 3px;
   transition: all 0.3s;
 }
+
 #tree .node-path.visited {
   stroke: #0000ff;
   stroke-width: 4px;
 }
 
 .tree-taskbar {
-  position: absolute;
+  position: relative;
   width: 100vw;
   display: flex;
-  justify-content: start;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: center;
-  padding: 10px;
-  padding-left: 50px;
+  padding: 10px 50px;
 }
+
+.tree-taskbar form {
+  margin: 10px;
+}
+
 .tree-taskbar button {
   margin: 10px;
   padding: 10px;
@@ -56,27 +108,23 @@
   transition: 0.2s;
   box-shadow: 0 0 5px #000000;
 }
+
 .tree-taskbar button:hover {
   box-shadow: 0 0 8px #000000;
   background-color: #222;
   color: white;
 }
+
 .tree-taskbar button#delete-node-btn {
   background-color: #ff0000;
   color: white;
 }
+
 .tree-taskbar button#delete-node-btn:hover {
   background-color: #ff0000;
   color: white;
 }
-.tree-taskbar button#change-value-btn {
-  background-color: #00dd00;
-  color: white;
-}
-.tree-taskbar button#change-value-btn:hover {
-  background-color: #00dd00;
-  color: white;
-}
+
 .tree-taskbar input#edit-node {
   margin: 10px;
   padding: 10px;
@@ -88,28 +136,8 @@
   transition: 0.2s;
   box-shadow: 0 0 5px #000000;
 }
+
 .tree-taskbar input#edit-node:focus {
   outline: none;
   box-shadow: 0 0 8px #000000;
 }
-
-#traversal-result {
-  position: absolute;
-  top: 100px;
-  right: 200px;
-  text-align: center;
-  border: 3px solid #0000ff;
-  color: #0000ff;
-  padding: 10px;
-  font: 700 2rem "Roboto", sans-serif;
-}
-#traversal-result::before {
-  content: "Traversal Order:";
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5rem;
-  text-wrap: nowrap;
-  color: #000000;
-}/*# sourceMappingURL=Tree.css.map */

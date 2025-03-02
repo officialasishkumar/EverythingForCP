@@ -5,7 +5,7 @@ import "../../Styles/LinkedList/linked-list.css";
 const LinkedList = () => {
 
     useEffect(() => {
-        AppendScript("/linkedlist.js");
+        AppendScript("/linkedlist.js", "ListNode");
         return () => {
             RemoveScript("/linkedlist.js");
         }

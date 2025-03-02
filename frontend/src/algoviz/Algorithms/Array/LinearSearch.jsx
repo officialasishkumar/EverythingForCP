@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
-import "../../Styles/Array/LinearSearch.css"
+import { useState, useEffect, useRef } from "react";
+import "../../Styles/Array/LinearSearch.css";
 
+// Generates a new array if none is provided, or returns the provided array (and random target if none given)
 export function createArray(size = 15, inputArray = [], target = null) {
-    const boxes = document.querySelectorAll(".array-box");
-    boxes.forEach(box => {
-        box.classList = "array-box";
-    })
+    resetArrayStyles();
+
     if (inputArray.length > 0) {
-        target = target == null ? inputArray[Math.floor(Math.random() * (inputArray.length - 1))] : target;
+        target = target === null ? inputArray[Math.floor(Math.random() * inputArray.length)] : target;
         return [inputArray, target];
     }
 
@@ -15,142 +14,210 @@ export function createArray(size = 15, inputArray = [], target = null) {
     for (let i = 0; i < size; i++) {
         array.push(Math.floor(Math.random() * 10));
     }
-    const idx = Math.floor(Math.random() * (size - 1));
+    const idx = Math.floor(Math.random() * size);
     return [array, array[idx]];
 }
 
-async function linearSearch(arr, target) {
+async function linearSearch(arr, target, cancelToken) {
     let last = -1;
     for (let i = 0; i < arr.length; i++) {
-        if (arr[i] == target) {
+        if (cancelToken.cancelled) break;
+        if (arr[i] === target) {
             visualizeLinearSearch(i, true, last++);
         } else {
             visualizeLinearSearch(i, false, last++);
         }
         await delayIt();
     }
-    visualizeLinearSearch(-1, false, last++);
-
+    if (!cancelToken.cancelled) {
+        visualizeLinearSearch(-1, false, last++);
+    }
     return -1;
 }
 
 export function delayIt() {
-    return new Promise(resolve => setTimeout(resolve, 1000));
+    return new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
 function visualizeLinearSearch(index, found = false, last) {
     const boxes = document.querySelectorAll(".array-box");
-    if (last != -1 && !boxes[last].classList.contains("found"))
+    if (last !== -1 && boxes[last] && !boxes[last].classList.contains("found"))
         boxes[last].classList.add("visited");
     for (let i = 0; i < boxes.length; i++) {
         if (!boxes[i].classList.contains("found"))
             boxes[i].classList.remove("selected");
     }
-    if (found && index != -1) boxes[index].classList.add("found");
-    else if (index != -1)
-        boxes[index].classList.add("selected");
+    if (found && index !== -1) boxes[index].classList.add("found");
+    else if (index !== -1) boxes[index].classList.add("selected");
+}
+
+function resetArrayStyles() {
+    const boxes = document.querySelectorAll(".array-box");
+    boxes.forEach((box) => {
+        box.className = "array-box";
+    });
+}
+
+function animateArrayChange() {
+    const boxes = document.querySelectorAll(".array-box");
+    boxes.forEach((box) => {
+        box.classList.add("boom");
+        setTimeout(() => {
+            box.classList.remove("boom");
+        }, 500);
+    });
 }
 
 const LinearSearch = () => {
     const [array, setArray] = useState([]);
-    const [userArray, setUserArray] = useState([]);
-    const [size, setSize] = useState(15);
-    const [target, setTarget] = useState(0);
+    const [target, setTarget] = useState(null);
+    const [arrayInput, setArrayInput] = useState("");
+    const [targetInput, setTargetInput] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const cancelTokenRef = useRef({ cancelled: false });
 
-    function generateNewArray() {
-        const [array, target] = createArray(size, userArray);
-        setArray([...array]);
-        setTarget(target);
-    }
+    // On mount, generate an initial random array
+    useEffect(() => {
+        const [newArray, newTarget] = createArray();
+        setArray([...newArray]);
+        setTarget(newTarget);
+    }, []);
 
-    function takeInputArray(e) {
-        e.preventDefault();
-        let inputArray = document.getElementById("input-array").value;
-
-        inputArray = inputArray.replace(/[\[\]{}()]/g, "");
-        inputArray = inputArray.trim().split(",");
-        inputArray = inputArray.map((value) => parseInt(value));
-        for (let i = 0; i < inputArray.length; i++) {
-            if (isNaN(inputArray[i])) {
-                alert("Invalid Input");
-                return;
+    // Realtime update when the array input changes (after validation)
+    useEffect(() => {
+        if (arrayInput.trim() !== "") {
+            const parsed = parseArrayInput(arrayInput);
+            if (parsed) {
+                setArray(parsed);
+                animateArrayChange();
             }
         }
-        setUserArray([...inputArray]);
+    }, [arrayInput]);
+
+    function parseArrayInput(input) {
+        // Remove any brackets and split by commas
+        input = input.replace(/[\[\]{}()]/g, "");
+        const parts = input.split(",").map((item) => item.trim()).filter((item) => item !== "");
+        const parsedArray = parts.map((item) => Number(item));
+        if (parsedArray.some(isNaN)) {
+            return null;
+        }
+        return parsedArray;
     }
 
-    function appear(index) {
-        let options = document.getElementById("options");
-        options.style.display = "none";
-        let inputs = document.querySelectorAll("#input-array-parent >*");
-        inputs[index].style.display = "flex";
-        const searchBtn = document.getElementById("search-btn");
-        searchBtn.style.display = "block";
+    // Gracefully cancel the ongoing search.
+    function cancelSearching() {
+        if (isSearching) {
+            cancelTokenRef.current.cancelled = true;
+            setIsSearching(false);
+            resetArrayStyles();
+            const searchBtn = document.querySelector("#start-search-btn");
+            if (searchBtn) searchBtn.innerText = "Start Searching";
+        }
     }
 
     async function startSearching() {
-        disableButtons();
-        document.querySelector("#target-box").style.display = "block";
-        await linearSearch(array, target);
-        enableButtons();
-        document.querySelector("#search-btn").style.display = "none";
-        document.querySelector("#search-again").style.display = "block";
+        // If search is already running, cancel it.
+        if (isSearching) {
+            cancelTokenRef.current.cancelled = true;
+            await delayIt();
+            setIsSearching(false);
+            resetArrayStyles();
+            return;
+        } else {
+            resetArrayStyles();
+        }
+
+        // Use user-provided array if available
+        let currentArray = array;
+        if (arrayInput.trim() !== "") {
+            const parsed = parseArrayInput(arrayInput);
+            if (!parsed) {
+                alert("Invalid Array Input");
+                return;
+            }
+            currentArray = parsed;
+            setArray([...parsed]);
+        }
+
+        // Use user-provided target if available
+        let currentTarget = target;
+        if (targetInput.trim() !== "") {
+            const parsedTarget = Number(targetInput);
+            if (isNaN(parsedTarget)) {
+                alert("Invalid Target Input");
+                return;
+            }
+            currentTarget = parsedTarget;
+            setTarget(parsedTarget);
+        } else {
+            // If no target provided, choose one randomly from the current array
+            currentTarget = currentArray[Math.floor(Math.random() * currentArray.length)];
+            setTarget(currentTarget);
+        }
+
+        // Prepare for new search
+        cancelTokenRef.current = { cancelled: false };
+        setIsSearching(true);
+        const searchBtn = document.querySelector("#start-search-btn");
+        if (searchBtn) searchBtn.innerText = "Stop";
+
+        await linearSearch(currentArray, currentTarget, cancelTokenRef.current);
+
+        setIsSearching(false);
+        if (searchBtn) searchBtn.innerText = "Start Searching";
     }
 
-    function disableButtons() {
-        const buttons = document.querySelectorAll("#binary-search-parent button, #array-controls input");
-        buttons.forEach(a => {
-            a.disabled = true;
-        })
-    }
+    // Input change handlers cancel any ongoing search before updating state.
+    const handleArrayInputChange = (e) => {
+        if (isSearching) {
+            cancelSearching();
+        }
+        setArrayInput(e.target.value);
+    };
 
-    function enableButtons() {
-        const buttons = document.querySelectorAll("#binary-search-parent button, #array-controls input");
-        buttons.forEach(a => {
-            a.disabled = false;
-        })
-    }
-    useEffect(() => {
-        generateNewArray();
-    }, [size, userArray])
+    const handleTargetInputChange = (e) => {
+        if (isSearching) {
+            cancelSearching();
+        }
+        setTargetInput(e.target.value);
+    };
 
     return (
         <div id="linear-search-parent">
-            <h1>Linear Search</h1>
+            <h1 className="animated-heading">Linear Search</h1>
             <div id="array-parent">
-                {array.map((value, index) => {
-                    return (
-                        <div className="array-box" key={index}>
-                            {value}
-                        </div>
-                    )
-                })}
+                {array.map((value, index) => (
+                    <div className="array-box" key={index}>
+                        {value}
+                    </div>
+                ))}
             </div>
             <div id="options">
-                <button id="generate-array-btn" onClick={() => { appear(0) }}>Give Input Array</button>
-                <button id="generate-array-btn" onClick={() => { appear(1) }}>Generate New Array</button>
+                <input
+                    type="text"
+                    id="array-input"
+                    placeholder="Enter Array (comma separated)"
+                    value={arrayInput}
+                    onChange={handleArrayInputChange}
+                />
+                <input
+                    type="number"
+                    id="target-input"
+                    placeholder="Enter Target"
+                    value={targetInput}
+                    onChange={handleTargetInputChange}
+                />
+                <button
+                    id="start-search-btn"
+                    onClick={startSearching}
+                    style={isSearching ? { backgroundColor: "red", color: "white" } : {}}
+                >
+                    {isSearching ? "Stop" : "Start Searching"}
+                </button>
             </div>
-            <div id="input-array-parent">
-                <form onSubmit={takeInputArray}>
-                    <input type="text" id="input-array" placeholder="Enter Array" />
-                    <input type="number" id="target" placeholder="Enter Target" />
-                    <button type="submit">Give input</button>
-                </form>
-                <div id="random-generation">
-                    <label htmlFor="size">Size of Array: {size}
-                        <input type="range" id="size" min="10" max="22" value={size} onChange={(e) => setSize(e.target.value)} />
-                    </label>
-
-                    <button id="generate-array-btn" onClick={generateNewArray}>Generate New Array</button>
-                </div>
-            </div>
-            <button id="search-btn" onClick={startSearching}>Start Searching</button>
-            <button id="search-again" onClick={() => {
-                window.location.reload();
-            }}>Search Again</button>
-            <div id="target-box">Target = {target}</div>
         </div>
-    )
-}
+    );
+};
 
 export default LinearSearch;
