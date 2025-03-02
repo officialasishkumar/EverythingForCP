@@ -1,165 +1,219 @@
-import { useState, useEffect } from "react";
-import '../../Styles/Array/BinarySearch.css';
+import { useState, useEffect, useRef } from "react";
+import "../../Styles/Array/BinarySearch.css";
 import { createArray, delayIt } from "./LinearSearch";
 
-async function binarySearch(arr, target) {
+// Updated binary search function with cancellation token support and realtime visualization.
+async function binarySearch(arr, target, cancelToken) {
     let low = 0;
     let high = arr.length - 1;
     while (low <= high) {
+        if (cancelToken.cancelled) break;
         let mid = Math.floor((low + high) / 2);
-        visualizeBinarySearch(low, high, mid, false);
-        if (arr[mid] == target) {
-            await delayIt(1000);
-            visualizeBinarySearch(low, high, mid, true, true);
+        visualizeBinarySearch(arr, low, high, mid, false);
+        await delayIt();
+        if (cancelToken.cancelled) break;
+        if (arr[mid] === target) {
+            visualizeBinarySearch(arr, low, high, mid, true);
             return mid;
-        }
-        else if (arr[mid] < target) {
-            await delayIt(1000);
-            visualizeBinarySearch(low, mid, null, false, true);
+        } else if (arr[mid] < target) {
             low = mid + 1;
-        }
-        else {
-            await delayIt(1000);
-            visualizeBinarySearch(mid, high, null, false, true)
+        } else {
             high = mid - 1;
         }
-        await delayIt(1000);
+        await delayIt();
     }
+    return -1;
 }
 
-function visualizeBinarySearch(start, end, mid, found = false, visited = false) {
-    let boxes = document.getElementsByClassName("array-box");
-    if (!visited) {
-        boxes[start].classList.add("start-box");
-        boxes[end].classList.add("end-box");
-        boxes[mid].classList.add("mid-box");
-    } else if (!found) {
-        for (let i = start; i <= end; i++) {
-            boxes[i].classList.add("visited");
-        }
-        for (let i = 0; i < boxes.length; i++) {
-            boxes[i].classList.remove("start-box");
-            boxes[i].classList.remove("end-box");
-            boxes[i].classList.remove("mid-box");
+// Visualization function that highlights the low, mid, and high indices,
+// and then marks the found element if applicable.
+function visualizeBinarySearch(arr, low, high, mid, found = false) {
+    const boxes = document.querySelectorAll(".array-box");
+    // Reset classes for all boxes.
+    boxes.forEach((box) => {
+        box.classList.remove("low-box", "high-box", "mid-box", "visited", "found");
+    });
+    if (found) {
+        boxes[mid].classList.add("found");
+        // Optionally mark the remaining search range as visited.
+        for (let i = low; i <= high; i++) {
+            if (i !== mid) boxes[i].classList.add("visited");
         }
     } else {
-        boxes[mid].classList.add("found");
-        for (let i = start; i <= end; i++) {
-            if (i != mid)
-                boxes[i].classList.add("visited");
-        }
+        boxes[low] && boxes[low].classList.add("low-box");
+        boxes[high] && boxes[high].classList.add("high-box");
+        boxes[mid] && boxes[mid].classList.add("mid-box");
     }
-
 }
+
+function resetArrayStyles() {
+    const boxes = document.querySelectorAll(".array-box");
+    boxes.forEach((box) => {
+        box.className = "array-box";
+    });
+}
+
+function animateArrayChange() {
+    const boxes = document.querySelectorAll(".array-box");
+    boxes.forEach((box) => {
+        box.classList.add("boom");
+        setTimeout(() => {
+            box.classList.remove("boom");
+        }, 500);
+    });
+}
+
 const BinarySearch = () => {
     const [array, setArray] = useState([]);
-    const [userArray, setUserArray] = useState([]);
-    const [size, setSize] = useState(20);
-    const [target, setTarget] = useState(0);
-    const [searchFinished, setSearchFinished] = useState(true);
+    const [target, setTarget] = useState(null);
+    const [arrayInput, setArrayInput] = useState("");
+    const [targetInput, setTargetInput] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
+    const cancelTokenRef = useRef({ cancelled: false });
 
+    // On mount, generate an initial sorted array.
+    useEffect(() => {
+        generateNewArray();
+    }, []);
+
+    // Update the array display in realtime as the user types (with validation and animation)
+    useEffect(() => {
+        if (arrayInput.trim() !== "") {
+            const parsed = parseArrayInput(arrayInput);
+            if (parsed) {
+                const sorted = parsed.sort((a, b) => a - b);
+                setArray(sorted);
+                animateArrayChange();
+            }
+        }
+    }, [arrayInput]);
+
+    function parseArrayInput(input) {
+        input = input.replace(/[\[\]{}()]/g, "");
+        const parts = input.split(",").map((item) => item.trim()).filter((item) => item !== "");
+        const parsedArray = parts.map((item) => Number(item));
+        if (parsedArray.some(isNaN)) {
+            return null;
+        }
+        return parsedArray;
+    }
+
+    // Generates a new array using the helper from LinearSearch.
     function generateNewArray() {
-        const [array, newTarget] = createArray(size, userArray, target);
-        array.sort((a, b) => a - b);
-        setArray([...array]);
+        const [newArray, newTarget] = createArray(20, [], null);
+        const sorted = newArray.sort((a, b) => a - b);
+        setArray([...sorted]);
         setTarget(newTarget);
-        console.log(target);
+    }
+
+    // Gracefully cancel an ongoing search.
+    function cancelSearching() {
+        if (isSearching) {
+            cancelTokenRef.current.cancelled = true;
+            setIsSearching(false);
+            resetArrayStyles();
+            const searchBtn = document.querySelector("#start-search-btn");
+            if (searchBtn) searchBtn.innerText = "Start Searching";
+        }
     }
 
     async function startSearching() {
-        disableButtons();
-        document.querySelector("#target-box").style.display = "block";
-        await binarySearch(array, target);
-        enableButtons();
-        document.querySelector("#search-btn").style.display = "none";
-        document.querySelector("#search-again").style.display = "block";
-    }
+        // If a search is already running, cancel it.
+        if (isSearching) {
+            cancelSearching();
+            return;
+        } else {
+            resetArrayStyles();
+        }
 
-    function takeInputArray(e) {
-        e.preventDefault();
-        let inputArray = document.getElementById("input-array").value;
-        let newTarget = document.getElementById("target").value;
-        inputArray = inputArray.replace(/[\[\]{}()]/g, "");
-        inputArray = inputArray.trim().split(",");
-        inputArray = inputArray.map((value) => parseInt(value));
-        for (let i = 0; i < inputArray.length; i++) {
-            if (isNaN(inputArray[i])) {
-                alert("Invalid Input");
+        // Use user-provided array if available.
+        let currentArray = array;
+        if (arrayInput.trim() !== "") {
+            const parsed = parseArrayInput(arrayInput);
+            if (!parsed) {
+                alert("Invalid Array Input");
                 return;
             }
+            currentArray = parsed.sort((a, b) => a - b);
+            setArray([...currentArray]);
         }
-        setTarget(newTarget);
-        setUserArray([...inputArray]);
+
+        // Use user-provided target if available.
+        let currentTarget = target;
+        if (targetInput.trim() !== "") {
+            const parsedTarget = Number(targetInput);
+            if (isNaN(parsedTarget)) {
+                alert("Invalid Target Input");
+                return;
+            }
+            currentTarget = parsedTarget;
+            setTarget(parsedTarget);
+        } else {
+            currentTarget = currentArray[Math.floor(Math.random() * currentArray.length)];
+            setTarget(currentTarget);
+        }
+
+        cancelTokenRef.current = { cancelled: false };
+        setIsSearching(true);
+        const searchBtn = document.querySelector("#start-search-btn");
+        if (searchBtn) searchBtn.innerText = "Stop";
+
+        await binarySearch(currentArray, currentTarget, cancelTokenRef.current);
+
+        setIsSearching(false);
+        if (searchBtn) searchBtn.innerText = "Start Searching";
     }
 
-    function disableButtons() {
-        const buttons = document.querySelectorAll("#binary-search-parent button, #array-controls input");
-        buttons.forEach(a => {
-            a.disabled = true;
-        })
-    }
+    // Input change handlers that cancel any ongoing search.
+    const handleArrayInputChange = (e) => {
+        if (isSearching) {
+            cancelSearching();
+        }
+        setArrayInput(e.target.value);
+    };
 
-    function enableButtons() {
-        const buttons = document.querySelectorAll("#binary-search-parent button, #array-controls input");
-        buttons.forEach(a => {
-            a.disabled = false;
-        })
-    }
+    const handleTargetInputChange = (e) => {
+        if (isSearching) {
+            cancelSearching();
+        }
+        setTargetInput(e.target.value);
+    };
 
-    function appear(index) {
-        let options = document.getElementById("options");
-        options.style.display = "none";
-        let inputs = document.querySelectorAll("#input-array-parent >*");
-        inputs[index].style.display = "flex";
-        const searchBtn = document.getElementById("search-btn");
-        searchBtn.style.display = "block";
-    }
-
-    useEffect(() => {
-        generateNewArray();
-    }, [userArray])
-
-    useEffect(() => {
-        setUserArray([]);
-        generateNewArray();
-    }, [size])
     return (
         <div id="binary-search-parent">
-            <h1>Binary Search</h1>
+            <h1 className="animated-heading">Binary Search</h1>
             <div id="array-parent">
-                {array.map((value, index) => {
-                    return (
-                        <div className="array-box" key={index}>
-                            {value}
-                        </div>
-                    )
-                })}
+                {array.map((value, index) => (
+                    <div className="array-box" key={index}>
+                        {value}
+                    </div>
+                ))}
             </div>
             <div id="options">
-                <button id="generate-array-btn" onClick={() => { appear(0) }}>Give Input Array</button>
-                <button id="generate-array-btn" onClick={() => { appear(1) }}>Generate New Array</button>
+                <input
+                    type="text"
+                    id="array-input"
+                    placeholder="Enter Array (comma separated)"
+                    value={arrayInput}
+                    onChange={handleArrayInputChange}
+                />
+                <input
+                    type="number"
+                    id="target-input"
+                    placeholder="Enter Target"
+                    value={targetInput}
+                    onChange={handleTargetInputChange}
+                />
+                <button
+                    id="start-search-btn"
+                    onClick={startSearching}
+                    style={isSearching ? { backgroundColor: "red", color: "white" } : {}}
+                >
+                    {isSearching ? "Stop" : "Start Searching"}
+                </button>
             </div>
-            <div id="input-array-parent">
-                <form onSubmit={takeInputArray}>
-                    <input type="text" id="input-array" placeholder="Enter Array" />
-                    <input type="number" id="target" placeholder="Enter Target" />
-                    <button type="submit">Give input</button>
-                </form>
-                <div id="random-generation">
-                    <label htmlFor="size">Size of Array: {size}
-                        <input type="range" id="size" min="10" max="22" value={size} onChange={(e) => setSize(e.target.value)} />
-                    </label>
-
-                    <button id="generate-array-btn" onClick={generateNewArray}>Generate New Array</button>
-                </div>
-            </div>
-            <button id="search-btn" onClick={startSearching}>Start Searching</button>
-            <button id="search-again" onClick={() => {
-                window.location.reload();
-            }}>Search Again</button>
-            <div id="target-box">Target = {target}</div>
         </div>
-    )
-}
+    );
+};
 
 export default BinarySearch;

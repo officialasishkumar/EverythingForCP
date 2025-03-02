@@ -105,8 +105,19 @@ const LinearSearch = () => {
         return parsedArray;
     }
 
+    // Gracefully cancel the ongoing search.
+    function cancelSearching() {
+        if (isSearching) {
+            cancelTokenRef.current.cancelled = true;
+            setIsSearching(false);
+            resetArrayStyles();
+            const searchBtn = document.querySelector("#start-search-btn");
+            if (searchBtn) searchBtn.innerText = "Start Searching";
+        }
+    }
+
     async function startSearching() {
-        // If search is already running, cancel it, reset styles and return
+        // If search is already running, cancel it.
         if (isSearching) {
             cancelTokenRef.current.cancelled = true;
             await delayIt();
@@ -114,7 +125,6 @@ const LinearSearch = () => {
             resetArrayStyles();
             return;
         } else {
-            // Always reset styling on new search
             resetArrayStyles();
         }
 
@@ -158,6 +168,21 @@ const LinearSearch = () => {
         if (searchBtn) searchBtn.innerText = "Start Searching";
     }
 
+    // Input change handlers cancel any ongoing search before updating state.
+    const handleArrayInputChange = (e) => {
+        if (isSearching) {
+            cancelSearching();
+        }
+        setArrayInput(e.target.value);
+    };
+
+    const handleTargetInputChange = (e) => {
+        if (isSearching) {
+            cancelSearching();
+        }
+        setTargetInput(e.target.value);
+    };
+
     return (
         <div id="linear-search-parent">
             <h1 className="animated-heading">Linear Search</h1>
@@ -174,14 +199,14 @@ const LinearSearch = () => {
                     id="array-input"
                     placeholder="Enter Array (comma separated)"
                     value={arrayInput}
-                    onChange={(e) => setArrayInput(e.target.value)}
+                    onChange={handleArrayInputChange}
                 />
                 <input
                     type="number"
                     id="target-input"
                     placeholder="Enter Target"
                     value={targetInput}
-                    onChange={(e) => setTargetInput(e.target.value)}
+                    onChange={handleTargetInputChange}
                 />
                 <button
                     id="start-search-btn"

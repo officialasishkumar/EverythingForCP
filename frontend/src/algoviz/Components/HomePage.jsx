@@ -11,7 +11,6 @@ const HomePage = () => {
             "Tree",
             "Linear Search",
             "Binary Search",
-            "Two Pointers",
             "Stack",
             "Linked List",
             "Matrix"

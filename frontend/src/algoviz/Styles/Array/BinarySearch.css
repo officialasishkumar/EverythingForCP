@@ -1,20 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 #binary-search-parent {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
+  padding-top: 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  gap: 100px;
+  gap: 30px;
+  overflow: hidden;
 }
-#binary-search-parent #array-parent {
+
+.animated-heading {
+  font-family: 'Lobster', cursive;
+  font-size: 3rem;
+  color: #333;
+  animation: fadeInDown 1s ease-out forwards;
+  margin: 0;
+  padding-top: 10px;
+}
+
+#array-parent {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-#binary-search-parent #array-parent .array-box {
+
+.array-box {
   width: 50px;
   height: 50px;
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -23,144 +51,84 @@
   box-shadow: 0 0 5px 0 #000;
   transition: all 0.2s ease-in-out;
 }
-#binary-search-parent #array-parent .array-box.visited {
-  opacity: 0.1;
+
+/* Binary Search Visualization Classes */
+.array-box.low-box {
+  border: 2px solid blue;
 }
-#binary-search-parent #array-parent .array-box.start-box, #binary-search-parent #array-parent .array-box.end-box, #binary-search-parent #array-parent .array-box.mid-box {
-  transform: scale(1.5);
-  box-shadow: 0 0 10px 0 blue;
-  margin: 0.5rem 1.2rem;
+
+.array-box.high-box {
+  border: 2px solid blue;
 }
-#binary-search-parent #array-parent .array-box.start-box::before, #binary-search-parent #array-parent .array-box.end-box::before, #binary-search-parent #array-parent .array-box.mid-box::before {
-  content: "Start";
-  position: absolute;
-  top: -25px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
+
+.array-box.mid-box {
+  border: 2px solid red;
 }
-#binary-search-parent #array-parent .array-box.end-box::before {
-  content: "End";
+
+.array-box.visited {
+  opacity: 0.5;
 }
-#binary-search-parent #array-parent .array-box.mid-box {
-  box-shadow: 0 0 10px 0 red;
-}
-#binary-search-parent #array-parent .array-box.mid-box::before {
-  content: "Mid";
-}
-#binary-search-parent #array-parent .array-box.found {
-  box-shadow: 0 0 10px 0 green;
-  margin-left: 1.2rem;
-  margin-right: 1.2rem;
+
+.array-box.found {
+  border: 2px solid green;
   transform: scale(1.5);
 }
-#binary-search-parent #array-parent .array-box.found::before {
-  content: "Found";
+
+/* Boom animation for realtime array updates */
+.array-box.boom {
+  animation: boomEffect 0.5s ease-out;
 }
-#binary-search-parent #input-array-parent form {
+
+@keyframes boomEffect {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+#options {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  gap: 50px;
+  gap: 20px;
 }
-#binary-search-parent #input-array-parent form input {
-  width: 200px;
-  height: 50px;
+
+#options input {
+  width: 250px;
+  height: 45px;
   border: 1px solid black;
   border-radius: 5px;
   padding: 0 8px;
-  font-size: 1.5rem;
+  font-size: 1rem;
   text-align: center;
 }
-#binary-search-parent #input-array-parent #random-generation {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 50px;
-}
-#binary-search-parent #input-array-parent #random-generation label {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  font-size: 1.2rem;
-  gap: 10px;
-}
-#binary-search-parent #input-array-parent #random-generation label input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 15px;
-  border-radius: 5px;
-  background-color: #fff;
-  outline: none;
-  cursor: pointer;
-  transition: all 0.3s linear;
-  box-shadow: 0 0 5px 0 #000;
-}
-#binary-search-parent #input-array-parent #random-generation label input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: #000;
-  cursor: pointer;
-  -webkit-transition: all 0.3s linear;
-  transition: all 0.3s linear;
-}
-#binary-search-parent #input-array-parent #random-generation label input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  cursor: pointer;
-  border-radius: 5px;
-}
-#binary-search-parent #input-array-parent #random-generation label input[type=range]:hover {
-  box-shadow: 0 0 5px 0 #000;
-}
-#binary-search-parent #input-array-parent #random-generation label input[type=range]:hover::-webkit-slider-thumb {
-  box-shadow: 0 0 5px 0 #000;
-}
-#binary-search-parent #input-array-parent form,
-#binary-search-parent #input-array-parent #random-generation {
-  display: none;
-}
-#binary-search-parent #options,
-#binary-search-parent #input-array-parent {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 100px;
-}
-#binary-search-parent #target-box {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 20px;
-  font-size: 1.5rem;
-  border: 2px solid black;
-  box-shadow: 0 0 5px 0 black;
-  display: none;
-}
-#binary-search-parent button {
+
+#options button {
   width: 200px;
-  height: 50px;
+  height: 45px;
   border: 1px solid black;
   border-radius: 5px;
   background-color: #fff;
-  font-size: 20px;
+  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s linear;
 }
-#binary-search-parent button:hover {
+
+#options button:hover {
   background-color: #000;
   color: #fff;
 }
-#binary-search-parent button:disabled {
+
+#options button:disabled {
   background-color: #fff;
   cursor: not-allowed;
   opacity: 0.5;
 }
-#binary-search-parent #search-btn {
-  display: none;
-}
-#binary-search-parent #search-again {
-  display: none;
-}/*# sourceMappingURL=BinarySearch.css.map */

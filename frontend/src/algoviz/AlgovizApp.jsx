@@ -18,7 +18,6 @@ function App() {
       {/* Direct routes to array algorithms */}
       <Route path="/linear-search" element={<LinearSearch />} />
       <Route path="/binary-search" element={<BinarySearch />} />
-      <Route path="/two-pointers" element={<TwoPointers />} />
       <Route path="/stack" element={<Stack />} />
       <Route path="/linked-list" element={<LinkedList />} />
       <Route path="/matrix" element={<Matrix />} />
