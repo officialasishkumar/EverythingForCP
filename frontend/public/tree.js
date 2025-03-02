@@ -1,5 +1,11 @@
 (function () {
-    let cancelTraversal = false;
+    // Remove old cancelTraversal flag and use a token mechanism instead.
+    let currentTraversalToken = {}; // Global token for cancellation
+
+    // Cancels any running traversal by replacing the token.
+    function cancelRunningTraversal() {
+        currentTraversalToken = {};
+    }
 
     class TreeNode {
         constructor(value, left = null, right = null, index = null) {
@@ -21,77 +27,80 @@
             createNewNode(0, 0, null, this.root, null);
         }
 
-        async levelOrder() {
-            if (cancelTraversal) return; // Stop if traversal is canceled.
+        async levelOrder(token) {
+            if (currentTraversalToken !== token) return; // Check token
 
             let queue = [];
             queue.push(this.root);
             handleNodeSelect();
             this.root.nodeBase.classList.add("visited");
-            while (queue.length != 0) {
+            while (queue.length !== 0) {
                 let node = queue.shift();
                 if (node.left != null) {
                     await delayIt();
+                    if (currentTraversalToken !== token) return;
                     node.srcLeft.classList.add("visited");
                     node.left.nodeBase.classList.add("visited");
                     queue.push(node.left);
                 }
                 if (node.right != null) {
                     await delayIt();
+                    if (currentTraversalToken !== token) return;
                     node.srcRight.classList.add("visited");
                     node.right.nodeBase.classList.add("visited");
                     queue.push(node.right);
                 }
-                traverSalResultBox.innerHTML += node.value + "<br /> ";
+                traverSalResultBox.innerHTML += node.value + " ";
             }
         }
 
-        async preOrder(node, currPath) {
-            if (cancelTraversal) return; // Stop if traversal is canceled.
+        async preOrder(node, currPath, token) {
+            if (currentTraversalToken !== token) return;
             if (node == null) return;
             await delayIt();
-            if (cancelTraversal) return; // Stop if traversal is canceled.
+            if (currentTraversalToken !== token) return;
 
-            traverSalResultBox.innerHTML += node.value + "<br /> ";
+            traverSalResultBox.innerHTML += node.value + " ";
             node.nodeBase.classList.add("visited");
             currPath?.classList.add("visited");
-            await this.preOrder(node.left, node.srcLeft);
-            await this.preOrder(node.right, node.srcRight);
+            await this.preOrder(node.left, node.srcLeft, token);
+            await this.preOrder(node.right, node.srcRight, token);
         }
 
-        async postOrder(node, currPath) {
-            if (cancelTraversal) return; // Stop if traversal is canceled.
-
+        async postOrder(node, currPath, token) {
+            if (currentTraversalToken !== token) return;
             if (node == null) return;
             await delayIt();
-            if (cancelTraversal) return; // Stop if traversal is canceled.
+            if (currentTraversalToken !== token) return;
 
             currPath?.classList.add("visited");
             node.nodeBase.classList.add("explored");
             console.log("explored ", node.value)
             await delayIt();
-            await this.postOrder(node.left, node.srcLeft);
-            await this.postOrder(node.right, node.srcRight);
-            traverSalResultBox.innerHTML += node.value + "<br /> ";
+            if (currentTraversalToken !== token) return;
+            await this.postOrder(node.left, node.srcLeft, token);
+            if (currentTraversalToken !== token) return;
+            await this.postOrder(node.right, node.srcRight, token);
+            if (currentTraversalToken !== token) return;
+            traverSalResultBox.innerHTML += node.value + " ";
             node.nodeBase.classList.add("visited");
             await delayIt();
-
         }
 
-        async inOrder(node, currPath) {
-            if (cancelTraversal) return; // Stop if traversal is canceled.
-
+        async inOrder(node, currPath, token) {
+            if (currentTraversalToken !== token) return;
             if (node == null) return;
             await delayIt();
-            if (cancelTraversal) return; // Stop if traversal is canceled.
+            if (currentTraversalToken !== token) return;
 
             node.nodeBase.classList.add("explored");
             currPath?.classList.add("visited");
-            await this.inOrder(node.left, node.srcLeft);
+            await this.inOrder(node.left, node.srcLeft, token);
+            if (currentTraversalToken !== token) return;
             node.nodeBase.classList.add("visited");
-            traverSalResultBox.innerHTML += node.value + "<br /> ";
+            traverSalResultBox.innerHTML += node.value + " ";
             let time2 = performance.now();
-            await this.inOrder(node.right, node.srcRight);
+            await this.inOrder(node.right, node.srcRight, token);
             if (performance.now() - time2 < 100) await delayIt();
         }
     }
@@ -100,7 +109,8 @@
     let position = [];
     const deleteNodeBtn = document.getElementById("delete-node-btn");
     const editNodeInput = document.getElementById("edit-node");
-    const changeValueBtn = document.getElementById("change-value-btn");
+    // Removed changeValueBtn since we now update live
+    // const changeValueBtn = document.getElementById("change-value-btn");
     const levelOrderBtn = document.getElementById("levelOrderBtn");
     const preOrderBtn = document.getElementById("preOrderBtn");
     const postOrderBtn = document.getElementById("postOrderBtn");
@@ -108,29 +118,36 @@
     const traverSalResultBox = document.getElementById("traversal-result");
     const clearTreeBtn = document.getElementById("clear-tree");
     const demoTreeBtn = document.getElementById("demo-tree-btn");
+
+    // Updated event listeners for traversals – cancel any running traversal before starting a new one.
     inOrderBtn.onclick = () => {
+        cancelRunningTraversal();
         resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
-        tree.inOrder(tree.root);
+        // Start new traversal with a fresh token.
+        tree.inOrder(tree.root, null, currentTraversalToken);
     }
     postOrderBtn.onclick = () => {
+        cancelRunningTraversal();
         resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
-        tree.postOrder(tree.root);
+        tree.postOrder(tree.root, null, currentTraversalToken);
     }
     levelOrderBtn.onclick = () => {
+        cancelRunningTraversal();
         resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
-        tree.levelOrder();
+        tree.levelOrder(currentTraversalToken);
     }
     preOrderBtn.onclick = () => {
+        cancelRunningTraversal();
         resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
-        tree.preOrder(tree.root);
+        tree.preOrder(tree.root, null, currentTraversalToken);
     }
     demoTreeBtn.onclick = () => {
         traverSalResultBox.innerHTML = "";
@@ -182,21 +199,16 @@
         demoTree(parent.right, rightSize);
     }
 
-    changeValueBtn.addEventListener("click", () => {
-        if (selectedNode == null) {
-            alert("Select any node first");
-            return;
-        }
+    // Removed changeValueBtn click event listener.
+    // Instead, update the selected node’s value as the user types.
+    editNodeInput.addEventListener("input", () => {
+        if (selectedNode == null) return;
         let value = editNodeInput.value;
-        if (value === "") {
-            alert("enter valid value");
-            return;
-        }
         selectedNode.value = value;
         selectedNode.nodeBase.children[1].innerHTML = value;
-        handleNodeSelect();
         reStructure();
     });
+
     deleteNodeBtn.addEventListener("click", () => {
         deleteNode(selectedNode);
         selectedNode = null; // Clear the selection explicitly.
@@ -205,8 +217,8 @@
 
     function resetTreeStyles() {
         // Remove classes from all nodes.
-        const nodes = document.querySelectorAll('.node-base');
-        nodes.forEach(node => {
+        const nodesEl = document.querySelectorAll('.node-base');
+        nodesEl.forEach(node => {
             node.classList.remove("visited", "explored", "selected");
         });
         // Remove classes from all edges.
@@ -217,9 +229,6 @@
         // Optionally clear the traversal result display.
         traverSalResultBox.innerHTML = "";
     }
-
-
-
 
     function createNewNode(level, currValue, parentNode, currNode, direction = null) {
         if (!nodes[level]) addLevel(level);
@@ -242,11 +251,9 @@
         }
         treeParent.append(path);
 
-
         let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         circle.setAttribute("r", treeData.nodeRadius);
         group.appendChild(circle);
-
 
         let text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("fill", "black");
@@ -270,6 +277,8 @@
             group.style.cursor = "pointer";
         });
         group.addEventListener("click", () => {
+            // Cancel any running traversal when a node is clicked.
+            cancelRunningTraversal();
             handleNodeSelect(group);
         });
         return group;
@@ -281,7 +290,6 @@
             if (node == null) return;
             let left = node.level === nodes.length - 1 ? null : nodes[node.level + 1][node.index * 2];
             let right = node.level === nodes.length - 1 ? null : nodes[node.level + 1][node.index * 2 + 1];
-
 
             if (left == null) {
                 createPlus(node.level + 1, node, "left")
@@ -338,7 +346,6 @@
         editNodeInput.value = node.value;
         return node;
     }
-
 
     function createPlus(level, parent, direction) {
         let plusNode = createNewNode(level, "+", parent, new TreeNode("+"), direction);
@@ -498,8 +505,6 @@
         return new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-
-
     container.addEventListener("wheel", (e) => {
         if (e.deltaY < 0) {
             if (treeData.scale >= 1) return;
@@ -509,8 +514,6 @@
             if (treeData.scale <= 0.25) return;
             treeData.scale -= 0.05;
         }
-
-
         changeTreePosition();
     })
     container.addEventListener('mousedown', (e) => {
@@ -524,14 +527,12 @@
     container.addEventListener('mouseleave', () => {
         dragData.isDown = false;
         container.style.cursor = 'grab';
-    }
-    );
+    });
 
     container.addEventListener('mouseup', () => {
         dragData.isDown = false;
         container.style.cursor = 'grab';
-    }
-    );
+    });
 
     container.addEventListener('mousemove', (e) => {
         if (!dragData.isDown) return;
@@ -545,6 +546,8 @@
         dragData.startX = x;
         dragData.startY = y;
         changeTreePosition();
-    }
-    );
+    });
+
+    // Optional: Cancel any running traversal when the tree is clicked.
+    container.addEventListener("click", cancelRunningTraversal);
 })();
