@@ -22,12 +22,18 @@ const Stack = () => {
 
     function popFromContainer() {
         let stackBox = document.getElementById("stack-box");
-        if (stackBox.children.length === 0) return;
-        let lastChild = stackBox.querySelectorAll(".stack-item")[stackBox.children.length - 2];
+        let stackItems = stackBox.querySelectorAll(".stack-item");
+        if (stackItems.length === 0) return;
+
+        let lastChild = stackItems[stackItems.length - 1]; // Get the last item
         if (lastChild) {
             lastChild.classList.add("disappear");
             setTimeout(() => {
-                stackBox.removeChild(lastChild);
+                // Check if element still exists in DOM before removing
+                if (lastChild.parentNode === stackBox) {
+                    stackBox.removeChild(lastChild);
+                }
+
                 if (stackBox.querySelectorAll(".stack-item").length === 0) {
                     stackBox.querySelector(".empty-filler").style.display = "flex";
                 }
@@ -37,19 +43,30 @@ const Stack = () => {
 
     function clearContainer() {
         let stackBox = document.getElementById("stack-box");
-        let children = stackBox.querySelectorAll(".stack-item");
+        let children = Array.from(stackBox.querySelectorAll(".stack-item"));
+
         children.forEach(child => {
             child.classList.add("disappear");
-            setTimeout(() => {
-                stackBox.removeChild(child);
-            }, 1000);
-        })
+        });
+
+        // Remove all children after the animation completes
+        setTimeout(() => {
+            children.forEach(child => {
+                // Check if element still exists in DOM before removing
+                if (child.parentNode === stackBox) {
+                    stackBox.removeChild(child);
+                }
+            });
+            stackBox.querySelector(".empty-filler").style.display = "flex";
+        }, 1000);
     }
 
     function peekContainer() {
         let stackBox = document.getElementById("stack-box");
-        if (stackBox.children.length === 0) return;
-        let lastChild = stackBox.querySelectorAll(".stack-item")[stackBox.children.length - 2];
+        let stackItems = stackBox.querySelectorAll(".stack-item");
+        if (stackItems.length === 0) return;
+
+        let lastChild = stackItems[stackItems.length - 1]; // Get the last item
         if (lastChild) {
             lastChild.classList.add("selected");
             setTimeout(() => {
@@ -60,7 +77,6 @@ const Stack = () => {
 
     return (
         <div id="stack-container">
-            <h1> Stack</h1>
             <div className="stack-data">
                 <div id="stack-box">
                     <div className="empty-filler">
