@@ -6,43 +6,72 @@ import Loading from "./loadingC.gif";
 
 function Compiler() {
   const [userCode, setUserCode] = useState(``);
-
   const [userLang, setUserLang] = useState("python");
-
   const [userTheme, setUserTheme] = useState("vs-dark");
-
   const [fontSize, setFontSize] = useState(20);
-
   const [userInput, setUserInput] = useState("");
-
   const [userOutput, setUserOutput] = useState("");
-
   const [loading, setLoading] = useState(false);
 
-  const options = {
-    fontSize: fontSize,
+  const options = { fontSize: fontSize };
+
+  // Map your language value to Judge0 language IDs
+  const languageMapping = {
+    c: 50,
+    cpp: 54,
+    python: 71,
+    java: 62,
+    javascript: 63, // new language added
   };
 
-  function compile() {
+  async function compile() {
     setLoading(true);
     if (userCode === ``) {
+      setLoading(false);
       return;
     }
 
-    const host = "https://yoyo-gdyv.onrender.com";
+    // Build payload for Judge0 API
+    const data = JSON.stringify({
+      source_code: userCode,
+      language_id: languageMapping[userLang],
+      stdin: userInput,
+    });
+    const options = {
+      method: 'POST',
+      url: 'https://judge0-ce.p.rapidapi.com/submissions',
+      params: {
+        base64_encoded: 'false', // Changed to false for easier handling
+        wait: 'true', // Set to true to wait for result
+        fields: '*'
+      },
+      headers: {
+        'x-rapidapi-key': process.env.REACT_APP_JUDGE0_API_KEY,
+        'x-rapidapi-host': 'judge0-ce.p.rapidapi.com',
+        'Content-Type': 'application/json'
+      },
+      data
+    };
 
-    axios
-      .post(`${host}/compile`, {
-        code: userCode,
-        language: userLang,
-        input: userInput,
-      })
-      .then((res) => {
-        setUserOutput(res.data.output);
-      })
-      .then(() => {
-        setLoading(false);
-      });
+    try {
+      const response = await axios.request(options);
+
+      // Process the response
+      if (response.data.stdout) {
+        setUserOutput(response.data.stdout);
+      } else if (response.data.compile_output) {
+        setUserOutput(response.data.compile_output);
+      } else if (response.data.stderr) {
+        setUserOutput(response.data.stderr);
+      } else {
+        setUserOutput(response.data.message || "No output");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setUserOutput("Error: " + (error.response?.data?.message || error.message));
+    } finally {
+      setLoading(false);
+    }
   }
 
   function clearOutput() {
@@ -60,7 +89,7 @@ function Compiler() {
         setFontSize={setFontSize}
       />
       <div>
-        <div className="flex-col"> 
+        <div className="flex-col">
           <div>
             <Editor
               options={options}
@@ -70,9 +99,7 @@ function Compiler() {
               language={userLang}
               defaultLanguage="python"
               defaultValue="# Enter your code here"
-              onChange={(value) => {
-                setUserCode(value);
-              }}
+              onChange={(value) => setUserCode(value)}
             />
           </div>
           <div className="mt-5 flex justify-center">
@@ -89,16 +116,13 @@ function Compiler() {
               <h4>Output:</h4>
               {loading ? (
                 <div>
-                  <img width={"20px"} src={Loading} alt="" />
+                  <img width={"20px"} src={Loading} alt="Loading..." />
                 </div>
               ) : (
-                // <div>Loading...</div>
                 <div>
                   <pre>{userOutput}</pre>
                   <button
-                    onClick={() => {
-                      clearOutput();
-                    }}
+                    onClick={clearOutput}
                     className="bg-blue-900 text-white mt-4 p-1"
                   >
                     Clear
@@ -111,7 +135,7 @@ function Compiler() {
         <div className="flex justify-end">
           <button
             className="bg-blue-900 text-white hover:bg-white hover:text-blue-950 border-2 p-2 m-3 rounded-xl"
-            onClick={() => compile()}
+            onClick={compile}
           >
             Run
           </button>

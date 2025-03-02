@@ -14,30 +14,31 @@ const NavbarC = ({
     { value: "cpp", label: "C++" },
     { value: "python", label: "Python" },
     { value: "java", label: "Java" },
+    { value: "javascript", label: "JavaScript" }, // new language added
   ];
   const themes = [
     { value: "vs-dark", label: "Dark" },
     { value: "light", label: "Light" },
   ];
   return (
-    <div className="mt-72 mb-5">
+    <div className="my-4 py-3"> {/* Removed mt-72 to cut down on excess whitespace */}
       <div className="flex place-content-evenly">
         <Select
           className="text-xl"
           options={languages}
-          value={userLang}
+          value={languages.find(lang => lang.value === userLang)}
           onChange={(e) => setUserLang(e.value)}
           placeholder={userLang}
         />
         <Select
           className="text-xl"
           options={themes}
-          value={userTheme}
+          value={themes.find(theme => theme.value === userTheme)}
           onChange={(e) => setUserTheme(e.value)}
           placeholder={userTheme}
         />
         <div className='flex flex-wrap justify-center'>
-          <label className="mr-5 text-xl" for="bar">
+          <label className="mr-5 text-xl" htmlFor="bar">
             Font Size:
           </label>
           <input
