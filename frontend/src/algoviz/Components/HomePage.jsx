@@ -6,8 +6,16 @@ const HomePage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Only include implemented algorithms
-        const algorithms = ["Tree", "Array", "Stack", "Linked List", "Matrix"];
+        // Replace Array with individual algorithms
+        const algorithms = [
+            "Tree",
+            "Linear Search",
+            "Binary Search",
+            "Two Pointers",
+            "Stack",
+            "Linked List",
+            "Matrix"
+        ];
         const container = document.getElementById("home-page-card-container");
 
         // Clear container first (in case of re-render)
