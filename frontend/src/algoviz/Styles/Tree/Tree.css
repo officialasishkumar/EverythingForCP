@@ -95,7 +95,8 @@
 
 #traversal-result {
   position: absolute;
-  top: 100px;
+  top: 200px;
+  /* Increased from 100px to 200px */
   right: 200px;
   text-align: center;
   border: 3px solid #0000ff;

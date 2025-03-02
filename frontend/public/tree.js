@@ -1,4 +1,5 @@
 (function () {
+    let cancelTraversal = false;
 
     class TreeNode {
         constructor(value, left = null, right = null, index = null) {
@@ -21,6 +22,8 @@
         }
 
         async levelOrder() {
+            if (cancelTraversal) return; // Stop if traversal is canceled.
+
             let queue = [];
             queue.push(this.root);
             handleNodeSelect();
@@ -44,8 +47,11 @@
         }
 
         async preOrder(node, currPath) {
+            if (cancelTraversal) return; // Stop if traversal is canceled.
             if (node == null) return;
             await delayIt();
+            if (cancelTraversal) return; // Stop if traversal is canceled.
+
             traverSalResultBox.innerHTML += node.value + "<br /> ";
             node.nodeBase.classList.add("visited");
             currPath?.classList.add("visited");
@@ -54,7 +60,12 @@
         }
 
         async postOrder(node, currPath) {
+            if (cancelTraversal) return; // Stop if traversal is canceled.
+
             if (node == null) return;
+            await delayIt();
+            if (cancelTraversal) return; // Stop if traversal is canceled.
+
             currPath?.classList.add("visited");
             node.nodeBase.classList.add("explored");
             console.log("explored ", node.value)
@@ -68,8 +79,12 @@
         }
 
         async inOrder(node, currPath) {
+            if (cancelTraversal) return; // Stop if traversal is canceled.
+
             if (node == null) return;
             await delayIt();
+            if (cancelTraversal) return; // Stop if traversal is canceled.
+
             node.nodeBase.classList.add("explored");
             currPath?.classList.add("visited");
             await this.inOrder(node.left, node.srcLeft);
@@ -94,26 +109,34 @@
     const clearTreeBtn = document.getElementById("clear-tree");
     const demoTreeBtn = document.getElementById("demo-tree-btn");
     inOrderBtn.onclick = () => {
+        resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
         tree.inOrder(tree.root);
     }
     postOrderBtn.onclick = () => {
+        resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
         tree.postOrder(tree.root);
     }
     levelOrderBtn.onclick = () => {
+        resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
         tree.levelOrder();
     }
     preOrderBtn.onclick = () => {
+        resetTreeStyles();
         handleNodeSelect();
         traverSalResultBox.innerHTML = "";
         tree.preOrder(tree.root);
     }
     demoTreeBtn.onclick = () => {
+        traverSalResultBox.innerHTML = "";
+        nodes = [];
+        position = [];
+        treeParent.innerHTML = "";
         initialize(10);
     }
 
@@ -176,9 +199,25 @@
     });
     deleteNodeBtn.addEventListener("click", () => {
         deleteNode(selectedNode);
-        handleNodeSelect();
+        selectedNode = null; // Clear the selection explicitly.
         reStructure();
     });
+
+    function resetTreeStyles() {
+        // Remove classes from all nodes.
+        const nodes = document.querySelectorAll('.node-base');
+        nodes.forEach(node => {
+            node.classList.remove("visited", "explored", "selected");
+        });
+        // Remove classes from all edges.
+        const edges = document.querySelectorAll('.node-path');
+        edges.forEach(edge => {
+            edge.classList.remove("visited");
+        });
+        // Optionally clear the traversal result display.
+        traverSalResultBox.innerHTML = "";
+    }
+
 
 
 
@@ -275,25 +314,31 @@
                 if (node != null) {
                     node.nodeBase.classList.remove("selected");
                 }
-            })
-        })
+            });
+        });
         removePlus();
         group?.classList.add("selected");
         let selectedGroup = document.querySelector(".node-base.selected");
         if (selectedGroup == null) {
             selectedNode = null;
-            return;
+            return null
         }
         let node = null;
         nodes.forEach(level => {
             level.forEach(n => {
                 if (n != null && n.nodeBase === selectedGroup) node = n;
-            })
+            });
         });
+        // Check if node was found before using it.
+        if (!node) {
+            selectedNode = null;
+            return null;
+        }
         selectedNode = node;
         editNodeInput.value = node.value;
         return node;
     }
+
 
     function createPlus(level, parent, direction) {
         let plusNode = createNewNode(level, "+", parent, new TreeNode("+"), direction);
