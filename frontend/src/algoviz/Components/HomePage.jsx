@@ -12,7 +12,7 @@ const HomePage = () => {
             "Linear Search",
             "Binary Search",
             "Stack",
-            "Linked List",
+            // "Linked List", // remove for now
             "Breadth First Search"
         ];
         const container = document.getElementById("home-page-card-container");
