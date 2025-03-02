@@ -13,7 +13,7 @@ const HomePage = () => {
             "Binary Search",
             "Stack",
             "Linked List",
-            "Matrix"
+            "Breadth First Search"
         ];
         const container = document.getElementById("home-page-card-container");
 
@@ -25,8 +25,13 @@ const HomePage = () => {
             el.classList.add("card");
             el.innerText = algo;
             el.addEventListener("click", () => {
-                // Navigate to /algoviz/[algo] where spaces are replaced with hyphens
-                navigate(`/algoviz/${algo.toLowerCase().replace(/ /g, "-")}`);
+                // Special case for Breadth First Search to maintain compatibility with "matrix" route
+                if (algo === "Breadth First Search") {
+                    navigate("/algoviz/matrix");
+                } else {
+                    // Navigate to /algoviz/[algo] where spaces are replaced with hyphens
+                    navigate(`/algoviz/${algo.toLowerCase().replace(/ /g, "-")}`);
+                }
             });
             container.appendChild(el);
         });
