@@ -16,7 +16,7 @@ const Home = () => {
       <img
         src="https://skoolofcode.us/wp-content/uploads/2022/11/cc1.jpg"
         alt="CP Image"
-        className="w-80vw h-auto"
+        className="w-8w h-auto"
       />
       <div className="flex flex-wrap gap-6 mt-10">
         <h2 className="text-4xl font-bold flex justify-center items-center h-16">
