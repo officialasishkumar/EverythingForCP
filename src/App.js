@@ -16,14 +16,17 @@ import AlgovizApp from "./algoviz/AlgovizApp";
 const NavLink = ({ to, children }) => {
   return (
     <motion.div
-      whileHover={{ scale: 1.05, transition: { duration: 0.2 } }}
+      whileHover={{ y: -2, transition: { duration: 0.2 } }}
     >
-      <Link to={to} className="text-white font-extrabold text-xl p-2 relative">
+      <Link
+        to={to}
+        className="text-white font-extrabold text-xl p-2.5 relative rounded-lg transition-all duration-300"
+      >
         <span className="relative z-10">{children}</span>
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 rounded-md"
+          className="absolute inset-0 bg-gradient-to-r from-blue-700/80 to-indigo-600/80 rounded-lg"
           initial={{ opacity: 0 }}
-          whileHover={{ opacity: 0.4, transition: { duration: 0.3 } }}
+          whileHover={{ opacity: 0.6, transition: { duration: 0.3 } }}
           style={{ zIndex: 0 }}
         />
       </Link>
@@ -35,8 +38,8 @@ const NavLink = ({ to, children }) => {
 export default function App() {
   return (
     <Router>
-      <header className="w-full bg-gradient-to-r from-blue-900 to-indigo-900">
-        <div className="px-4 py-4 flex justify-between items-center">
+      <header className="w-full sticky top-0 z-50 border-b border-white/10 bg-gradient-to-r from-blue-900/95 to-indigo-900/95 backdrop-blur-lg shadow-lg shadow-blue-950/20">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -81,13 +84,14 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black bg-opacity-50"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm"
               />
               <Dialog.Content
                 as={motion.div}
                 initial={{ x: "100%" }}
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 24, stiffness: 220 }}
                 className="fixed inset-0 bg-gradient-to-br from-blue-900 to-indigo-900 flex flex-col items-center p-6"
               >
                 <div className="self-end">
@@ -101,7 +105,7 @@ export default function App() {
                   <Dialog.Close asChild>
                     <Link
                       to="/visualize"
-                      className="p-3 text-center text-white font-extrabold text-xl hover:text-blue-900 hover:bg-white"
+                      className="p-3 text-center text-white font-extrabold text-xl rounded-lg transition-all duration-300 hover:text-blue-900 hover:bg-white"
                     >
                       VISUALIZEME
                     </Link>
@@ -109,7 +113,7 @@ export default function App() {
                   <Dialog.Close asChild>
                     <Link
                       to="/ladder"
-                      className="p-3 text-center text-white font-extrabold text-xl hover:text-blue-900 hover:bg-white"
+                      className="p-3 text-center text-white font-extrabold text-xl rounded-lg transition-all duration-300 hover:text-blue-900 hover:bg-white"
                     >
                       ELEVATOR
                     </Link>
@@ -117,7 +121,7 @@ export default function App() {
                   <Dialog.Close asChild>
                     <Link
                       to="/compiler"
-                      className="p-3 text-center text-white font-extrabold text-xl hover:text-blue-900 hover:bg-white"
+                      className="p-3 text-center text-white font-extrabold text-xl rounded-lg transition-all duration-300 hover:text-blue-900 hover:bg-white"
                     >
                       COMPILER
                     </Link>
@@ -125,7 +129,7 @@ export default function App() {
                   <Dialog.Close asChild>
                     <Link
                       to="/algoviz"
-                      className="p-3 text-center text-white font-extrabold text-xl hover:text-blue-900 hover:bg-white"
+                      className="p-3 text-center text-white font-extrabold text-xl rounded-lg transition-all duration-300 hover:text-blue-900 hover:bg-white"
                     >
                       ALGOVIZ
                     </Link>
@@ -137,7 +141,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="min-h-screen">
+      <main className="min-h-screen bg-gradient-to-b from-slate-100 via-blue-50 to-indigo-100">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/visualize" element={<Cfvis />} />
