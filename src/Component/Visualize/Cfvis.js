@@ -102,7 +102,7 @@ export default function Cfvis() {
     } else {
       setskipstate(true);
     }
-  }, [flag]);
+  }, [flag, skipstate, text]);
 
   // For Language Pie chart
   const programLang = () => {

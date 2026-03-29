@@ -53,7 +53,7 @@ export default function Ladder() {
     else {
       fetchdata();
     }
-  }, [flag]);
+  }, [flag, initialRender, userName]);
 
   const Onchange = (event) => {
     setuserName(event.target.value);
@@ -170,12 +170,13 @@ export default function Ladder() {
                               prob[3]
                             }
                             target="_blank"
+                            rel="noreferrer"
                           >
                             {prob[1]}
                           </a>
                         </td>
                         {mydata &&
-                          mydata.data.result.map((item) => {
+                          mydata.data.result.forEach((item) => {
                             if (
                               item.problem.contestId.toString() === prob[2] &&
                               item.problem.index.toString() === prob[3] &&
@@ -192,7 +193,7 @@ export default function Ladder() {
                               wrong.push(prob[2] + prob[3]);
                             }
                           })}
-                        {correct.map((item) => {
+                        {correct.forEach((item) => {
                           wrong = removeItemAll(wrong, item);
                         })}
                         {correct.includes(prob[2] + prob[3]) ? (

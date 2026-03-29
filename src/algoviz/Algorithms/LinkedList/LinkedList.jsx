@@ -1,5 +1,5 @@
 import AppendScript, { RemoveScript } from '../../Components/AppendScript';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import "../../Styles/LinkedList/linked-list.css";
 
 const LinkedList = () => {
