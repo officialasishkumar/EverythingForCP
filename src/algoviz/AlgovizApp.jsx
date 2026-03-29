@@ -1,11 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import HomePage from "./Components/HomePage";
 import "./Styles/home-page.css";
 import "./Styles/App.css";
 import Tree from "./Algorithms/Tree/Tree";
 import LinearSearch from "./Algorithms/Array/LinearSearch";
 import BinarySearch from "./Algorithms/Array/BinarySearch";
-import TwoPointers from "./Algorithms/Array/TwoPointers";
 import Stack from "./Algorithms/Stack/Stack";
 import LinkedList from "./Algorithms/LinkedList/LinkedList";
 import Matrix from "./Algorithms/Matrix/Matrix";

@@ -89,7 +89,7 @@ const BinarySearch = () => {
     }, [arrayInput]);
 
     function parseArrayInput(input) {
-        input = input.replace(/[\[\]{}()]/g, "");
+        input = input.replace(/[[\]{}()]/g, "");
         const parts = input.split(",").map((item) => item.trim()).filter((item) => item !== "");
         const parsedArray = parts.map((item) => Number(item));
         if (parsedArray.some(isNaN)) {
